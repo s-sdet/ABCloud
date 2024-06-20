@@ -1,0 +1,3 @@
+docker build -t autotests:latest -f Dockerfile .
+
+docker run autotests:latest

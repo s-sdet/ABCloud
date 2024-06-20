@@ -1,0 +1,30 @@
+variables:
+  IMAGE: ${REGISTRY_URL}/${CI_PROJECT_ROOT_NAMESPACE}-docker-local/${CI_PROJECT_ROOT_NAMESPACE}/custom_images/${CI_PROJECT_NAME}/prod/${CI_PROJECT_ROOT_NAMESPACE}-${CI_PROJECT_NAME}:0.0.1
+
+default:
+  tags:
+    - abo
+
+stages:
+  - runtest
+  - runtest_with_testrail
+
+test_chrome:
+  image: ${IMAGE}
+  stage: runtest
+  before_script:
+    - cat $credentials > data/data.py
+  script: 
+    - supervisord -d /run/ && sleep 20 && python3 -m pytest -vs --headless
+  when: always
+
+test_chrome_testrail:
+  image: ${IMAGE}
+  stage: runtest_with_testrail
+  before_script:
+    - cat $credentials > data/data.py
+    - cat $testrail_cfg > /tmp/testrail.cfg
+  script:
+    - supervisord -d /run/ && sleep 3
+    - python3 -m pytest -vs --headless --testrail --tr-config=/tmp/testrail.cfg --tr-no-ssl-cert-check
+  when: manual
